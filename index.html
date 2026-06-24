@@ -1,129 +1,115 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Brasil vs Escócia</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Palpites Coletivos</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background-color: #0047ab; 
-            margin: 0;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-        }
-        .container { 
-            background: white;
-            padding: 100px;
-            border-radius: 15px;
-            width: 150%;
-            max-width: 400px;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
-        }
-        h2 { color: #2c3e50; text-align: center; font-size: 1.6rem; margin-bottom: 20px; }
-        
-        input { 
-            padding: 15px; 
-            font-size: 1.2rem; 
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            width: 100%;
-            box-sizing: border-box;
-            margin-bottom: 10px;
-        }
-        
-        .placar-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .placar-container input { width: 100px; text-align: center; margin: 0; }
-        
-        .x-separador { font-size: 1.5rem; font-weight: bold; color: #555; }
-        
-        button { 
-            width: 100%; 
-            padding: 15px; 
-            background-color: #27ae60; 
-            color: white; 
-            border: none; 
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        ul { list-style: none; padding: 0; margin-top: 20px; }
-        li { 
-            background: #ecf0f1; 
-            margin-bottom: 10px; 
-            padding: 15px; 
-            border-radius: 8px;
-            font-size: 1.1rem;
-            border-left: 5px solid #27ae60;
-        }
+      body {
+        font-family: sans-serif;
+        background-color: #009639;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      .card {
+        background-color: #ffdf00;
+        color: #002776;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      input {
+        width: 80%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+      }
+      .placar {
+        width: 100px;
+        text-align: center;
+      }
+      button {
+        background-color: #002776;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .item-lista {
+        background: white;
+        margin: 5px 0;
+        padding: 10px;
+        border-radius: 5px;
+        color: #002776;
+      }
     </style>
-</head>
+  </head>
+  <body>
+    <h1>Palpites do Jogo ⚽</h1>
 
-    <div class="container">
-        <h2> Brasil<img src="brasil.jpg" alt="Brasil" width="30"> x Escócia <img src="escocia.jpg" alt="Escócia" width="30"></h2>
-        
-        <input type="text" id="nome" placeholder="Seu nome">
-        
-        <div class="placar-container">
-            <input type="number" id="golBrasil" placeholder=" BRA">
-            <span class="x-separador">x</span>
-            <input type="number" id="golEscocia" placeholder=" ESC">
-        </div>
-
-        <button onclick="registrarPalpite()">Registrar Palpite</button>
-
-        <h3>Palpites:</h3>
-        <ul id="listaPalpites"></ul>
+    <div class="card">
+      <input type="text" id="nome" placeholder="Seu nome" />
+      <input type="number" id="golsBrasil" class="placar" placeholder="BRASIL" />
+      <span>x</span>
+      <input type="number" id="golsEscocia" class="placar" placeholder="ESCÓCIA" />
+      <br />
+      <button onclick="adicionarPalpite()">Enviar Palpite</button>
     </div>
-<body>
+
+    <h3>Lista de Palpites:</h3>
+    <div id="listaPalpites"></div>
+    <button
+      onclick="limparTudo()"
+      style="background: #d32f2f; margin-top: 20px"
+    >
+      Limpar todos os palpites
+    </button>
 
     <script>
-    // 1. Ao carregar a página, busca os palpites salvos
-    document.addEventListener("DOMContentLoaded", carregarPalpites);
+      function carregarLista() {
+        const lista = JSON.parse(
+          localStorage.getItem("palpites_gerais") || "[]",
+        );
+        const divLista = document.getElementById("listaPalpites");
+        divLista.innerHTML = "";
 
-    function registrarPalpite() {
-        const nome = document.getElementById('nome').value;
-        const b = document.getElementById('golBrasil').value;
-        const e = document.getElementById('golEscocia').value;
-        
-        if(nome && b !== '' && e !== '') {
-            const novoPalpite = { nome, b, e };
-            
-            // Pega o que já existe ou cria um array vazio
-            let palpites = JSON.parse(localStorage.getItem('listaDePalpites') || '[]');
-            palpites.push(novoPalpite);
-            
-            // Salva o array atualizado no localStorage
-            localStorage.setItem('listaDePalpites', JSON.stringify(palpites));
-            
-            adicionarNaTela(novoPalpite);
-            
-            // Limpa campos
-            document.getElementById('nome').value = '';
-        } else {
-            alert("Por favor, preencha todos os campos!");
-        }
-    }
+        lista.forEach((p, index) => {
+          divLista.innerHTML += `<div class="item-lista">${p.nome}: ${p.placar}</div>`;
+        });
+      }
 
-    function adicionarNaTela(p) {
-        const li = document.createElement('li');
-        li.innerText = `${p.nome}: Brasil ${p.b} x ${p.e} Escócia`;
-        document.getElementById('listaPalpites').appendChild(li);
-    }
+      function adicionarPalpite() {
+        const nome = document.getElementById("nome").value;
+        const b = document.getElementById("golsBrasil").value;
+        const e = document.getElementById("golsEscocia").value;
 
-    function carregarPalpites() {
-        const palpites = JSON.parse(localStorage.getItem('listaDePalpites') || '[]');
-        palpites.forEach(adicionarNaTela);
-    }
-</script>
-</body>
+        if (!nome || !b || !e) return alert("Preencha tudo!");
+
+        const lista = JSON.parse(
+          localStorage.getItem("palpites_gerais") || "[]",
+        );
+        lista.push({ nome: nome, placar: `${b} x ${e}` });
+
+        localStorage.setItem("palpites_gerais", JSON.stringify(lista));
+        carregarLista();
+
+        // Limpa os campos
+        document.getElementById("nome").value = "";
+        document.getElementById("golsBrasil").value = "";
+        document.getElementById("golsEscocia").value = "";
+      }
+
+      function limparTudo() {
+        localStorage.removeItem("palpites_gerais");
+        carregarLista();
+      }
+
+      window.onload = carregarLista;
+    </script>
+  </body>
 </html>
