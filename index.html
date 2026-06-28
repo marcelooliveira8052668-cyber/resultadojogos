@@ -67,7 +67,7 @@ window.limparPalpites = async () => {
     const senha = prompt("Digite a senha de administrador:");
     
     // SUBSTITUA "SUA_SENHA_AQUI" PELA SENHA QUE VOCÊ ESCOLHER
-    if (senha === "SuaSenhaSegura123") {
+    if (senha === "185422") {
         const querySnapshot = await getDocs(col);
         querySnapshot.forEach(async (doc) => {
             await deleteDoc(doc.ref);
