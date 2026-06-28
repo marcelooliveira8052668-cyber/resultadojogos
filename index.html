@@ -13,7 +13,7 @@
 </head>
 <body>
 
-    <h1>Brasil  x  Japão</h1>
+    <h1>Brasil 🇧🇷 x Japão 🇯🇵</h1>
     <div class="card">
         <input id="nome" placeholder="Seu nome">
         <input id="golsBrasil" type="number" placeholder="Gols Brasil">
@@ -26,7 +26,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const config = {
             apiKey: "AIzaSyBDCeIiV7B4yfCMjyQjULHIg6UoetCd9DE",
@@ -44,41 +44,44 @@
         window.enviar = async () => {
             const n = document.getElementById('nome').value;
             const b = document.getElementById('golsBrasil').value;
-            const e = document.getElementById('golsEscocia').value;
-            if(n && b && e) {
-                await addDoc(col, { nome: n, brasil: b, escocia: e, data: Date.now() });
-                document.getElementById('nome').value = ""; // Limpa o campo
+            const j = document.getElementById('golsJapao').value; // CORRIGIDO AQUI
+            
+            if(n && b !== "" && j !== "") {
+                await addDoc(col, { nome: n, brasil: b, japao: j, data: Date.now() });
+                document.getElementById('nome').value = "";
+                document.getElementById('golsBrasil').value = "";
+                document.getElementById('golsJapao').value = "";
+            } else {
+                alert("Por favor, preencha todos os campos!");
             }
         };
 
-        // 2. Ouvir o Banco (Sempre que algo mudar, o site atualiza a lista)
+        // 2. Ouvir o Banco
         onSnapshot(query(col, orderBy("data", "desc")), (snap) => {
             const lista = document.getElementById('lista');
             lista.innerHTML = "<h3>Lista de Palpites:</h3>";
             snap.forEach(doc => {
                 const d = doc.data();
-                lista.innerHTML += `<div class="item">${d.nome}: ${d.brasil} x ${d.escocia}</div>`;
+                lista.innerHTML += `<div class="item">${d.nome}: ${d.brasil} x ${d.japao}</div>`;
             });
         });
-        // Adicione esta função dentro do seu bloco <script type="module">
-import { getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-window.limparPalpites = async () => {
-    const senha = prompt("Digite a senha de administrador:");
-    
-    // SUBSTITUA "SUA_SENHA_AQUI" PELA SENHA QUE VOCÊ ESCOLHER
-    if (senha === "185422") {
-        const querySnapshot = await getDocs(col);
-        querySnapshot.forEach(async (doc) => {
-            await deleteDoc(doc.ref);
-        });
-        alert("Lista de palpites limpa com sucesso!");
-    } else {
-        alert("Senha incorreta!");
-    }
-};
+        // 3. Limpador (Senha)
+        window.limparPalpites = async () => {
+            const senha = prompt("Digite a senha de administrador:");
+            if (senha === "185422") {
+                const querySnapshot = await getDocs(col);
+                querySnapshot.forEach(async (doc) => {
+                    await deleteDoc(doc.ref);
+                });
+                alert("Lista limpa!");
+            } else {
+                alert("Senha incorreta!");
+            }
+        };
     </script>
+
     <br><br>
-<button onclick="limparPalpites()" style="background: red; font-size: 10px;">Administrador: Limpar Tudo</button>
+    <button onclick="limparPalpites()" style="background: red; font-size: 10px;">Administrador: Limpar Tudo</button>
 </body>
 </html>
