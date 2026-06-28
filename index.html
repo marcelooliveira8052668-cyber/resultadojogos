@@ -60,6 +60,25 @@
                 lista.innerHTML += `<div class="item">${d.nome}: ${d.brasil} x ${d.escocia}</div>`;
             });
         });
+        // Adicione esta função dentro do seu bloco <script type="module">
+import { getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+window.limparPalpites = async () => {
+    const senha = prompt("Digite a senha de administrador:");
+    
+    // SUBSTITUA "SUA_SENHA_AQUI" PELA SENHA QUE VOCÊ ESCOLHER
+    if (senha === "SuaSenhaSegura123") {
+        const querySnapshot = await getDocs(col);
+        querySnapshot.forEach(async (doc) => {
+            await deleteDoc(doc.ref);
+        });
+        alert("Lista de palpites limpa com sucesso!");
+    } else {
+        alert("Senha incorreta!");
+    }
+};
     </script>
+    <br><br>
+<button onclick="limparPalpites()" style="background: red; font-size: 10px;">Administrador: Limpar Tudo</button>
 </body>
 </html>
