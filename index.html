@@ -8,7 +8,7 @@
         .card { background: #ffdf00; color: #002776; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; }
         input { width: 80%; padding: 10px; margin: 5px; border-radius: 5px; border: none; }
         button { background: #002776; color: white; border: none; padding: 10px 20px; margin-top: 10px; border-radius: 5px; cursor: pointer; }
-        .item { background: white; color: #002776; padding: 10px; margin: 10px auto; border-radius: 5px; max-width: 300px; font-weight: bold; }
+        .item { background: white; color: #002776; padding: 10px; margin: 10px auto; border-radius: 5px; max-width: 300px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -26,7 +26,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        // Importante: adicionei o 'doc' aqui
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const config = {
             apiKey: "AIzaSyBDCeIiV7B4yfCMjyQjULHIg6UoetCd9DE",
@@ -44,7 +45,7 @@
         window.enviar = async () => {
             const n = document.getElementById('nome').value;
             const b = document.getElementById('golsBrasil').value;
-            const j = document.getElementById('golsJapao').value; // CORRIGIDO AQUI
+            const j = document.getElementById('golsJapao').value;
             
             if(n && b !== "" && j !== "") {
                 await addDoc(col, { nome: n, brasil: b, japao: j, data: Date.now() });
@@ -60,19 +61,32 @@
         onSnapshot(query(col, orderBy("data", "desc")), (snap) => {
             const lista = document.getElementById('lista');
             lista.innerHTML = "<h3>Lista de Palpites:</h3>";
-            snap.forEach(doc => {
-                const d = doc.data();
-                lista.innerHTML += `<div class="item">${d.nome}: ${d.brasil} x ${d.japao}</div>`;
+            snap.forEach(docSnap => {
+                const d = docSnap.data();
+                // Adicionei o botão de excluir (x)
+                lista.innerHTML += `
+                    <div class="item">
+                        <span>${d.nome}: ${d.brasil} x ${d.japao}</span>
+                        <button onclick="apagarUm('${docSnap.id}')" style="background:none; border:none; color:red; cursor:pointer; font-weight:bold;">x</button>
+                    </div>`;
             });
         });
 
-        // 3. Limpador (Senha)
+        // 3. Apagar um específico
+        window.apagarUm = async (id) => {
+            const confirmar = confirm("Tem certeza que quer apagar este palpite?");
+            if (confirmar) {
+                await deleteDoc(doc(db, "palpites", id));
+            }
+        };
+
+        // 4. Limpador Geral (Senha)
         window.limparPalpites = async () => {
             const senha = prompt("Digite a senha de administrador:");
             if (senha === "185422") {
                 const querySnapshot = await getDocs(col);
-                querySnapshot.forEach(async (doc) => {
-                    await deleteDoc(doc.ref);
+                querySnapshot.forEach(async (docSnap) => {
+                    await deleteDoc(docSnap.ref);
                 });
                 alert("Lista limpa!");
             } else {
@@ -82,6 +96,6 @@
     </script>
 
     <br><br>
-    <button onclick="limparPalpites()" style="background: red; font-size: 10px;">Administrador: Limpar Tudo</button>
+    <button onclick="limparPalpites()" style="background: red; font-size: 12px;">Administrador: Limpar Tudo</button>
 </body>
 </html>
