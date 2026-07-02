@@ -2,31 +2,98 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Palpites Brasil x Noruega</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palpites: Brasil x Noruega</title>
     <style>
-        body { font-family: sans-serif; background: #009639; color: white; padding: 20px; text-align: center; }
-        .card { background: #ffdf00; color: #002776; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; }
-        input { width: 80%; padding: 10px; margin: 5px; border-radius: 5px; border: none; }
-        button { background: #002776; color: white; border: none; padding: 10px 20px; margin-top: 10px; border-radius: 5px; cursor: pointer; }
-        .item { background: white; color: #002776; padding: 10px; margin: 10px auto; border-radius: 5px; max-width: 300px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        :root {
+            --brasil-verde: #009639;
+            --brasil-amarelo: #ffdf00;
+            --noruega-azul: #002776;
+            --noruega-vermelho: #ba0c2f;
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, var(--brasil-verde), var(--noruega-azul)); 
+            color: white; 
+            margin: 0; 
+            padding: 20px; 
+            text-align: center; 
+            min-height: 100vh;
+        }
+
+        h1 { margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+
+        .card { 
+            background: white; 
+            color: #333; 
+            padding: 30px; 
+            border-radius: 20px; 
+            max-width: 400px; 
+            margin: 20px auto; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+        }
+
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+        }
+
+        button { 
+            background: var(--noruega-azul); 
+            color: white; 
+            border: none; 
+            padding: 12px 25px; 
+            margin-top: 10px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        button:hover { background: var(--noruega-vermelho); transform: scale(1.05); }
+
+        .item { 
+            background: rgba(255,255,255,0.95); 
+            color: #333; 
+            padding: 15px; 
+            margin: 10px auto; 
+            border-radius: 10px; 
+            max-width: 350px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-left: 5px solid var(--brasil-verde);
+        }
+
+        .admin-section { margin-top: 30px; }
     </style>
 </head>
 <body>
 
-    <h1>Brasil x Noruega</h1>
+    <h1>🇧🇷 Brasil x Noruega 🇳🇴</h1>
+    
     <div class="card">
         <input id="nome" placeholder="Seu nome">
         <input id="golsBrasil" type="number" placeholder="Gols Brasil">
         <input id="golsNoruega" type="number" placeholder="Gols Noruega">
-        <br>
         <button onclick="enviar()">Enviar Palpite</button>
     </div>
 
     <div id="lista"></div>
 
+    <div class="admin-section">
+        <button onclick="ativarModoAdmin()">⚙️ Admin</button>
+        <button onclick="limparPalpites()" style="background: var(--noruega-vermelho);">Limpar Tudo</button>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         const config = {
             apiKey: "AIzaSyBDCeIiV7B4yfCMjyQjULHIg6UoetCd9DE",
@@ -40,13 +107,13 @@
         const db = getFirestore(initializeApp(config));
         const col = collection(db, "palpites");
 
-        // 1. Enviar
         window.enviar = async () => {
             const n = document.getElementById('nome').value;
             const b = document.getElementById('golsBrasil').value;
             const j = document.getElementById('golsNoruega').value;
+            
             if(n && b !== "" && j !== "") {
-                await addDoc(col, { nome: n, brasil: b, noruega: n, data: Date.now() });
+                await addDoc(col, { nome: n, brasil: b, noruega: j, data: Date.now() });
                 document.getElementById('nome').value = "";
                 document.getElementById('golsBrasil').value = "";
                 document.getElementById('golsNoruega').value = "";
@@ -55,59 +122,11 @@
             }
         };
 
-        // 2. Ouvir o Banco
         onSnapshot(query(col, orderBy("data", "desc")), (snap) => {
             const lista = document.getElementById('lista');
-            lista.innerHTML = "<h3>Lista de Palpites:</h3>";
+            lista.innerHTML = "<h3>Palpites Recebidos:</h3>";
             snap.forEach(docSnap => {
                 const d = docSnap.data();
-                // O botão de exclusão começa com display:none (invisível)
                 lista.innerHTML += `
                     <div class="item">
-                        <span>${d.nome}: ${d.brasil} x ${d.noruega}</span>
-                        <button class="admin-btn" onclick="apagarUm('${docSnap.id}')" style="display:none; background:none; border:none; color:red; cursor:pointer; font-weight:bold;">x</button>
-                    </div>`;
-            });
-        });
-
-        // 3. Ativar Modo Admin
-        window.ativarModoAdmin = () => {
-            const senha = prompt("Digite a senha de administrador:");
-            if (senha === "185422") {
-                const botoes = document.querySelectorAll('.admin-btn');
-                botoes.forEach(btn => btn.style.display = "inline");
-                alert("Modo Administrador ativado!");
-            } else {
-                alert("Senha incorreta!");
-            }
-        };
-
-        // 4. Apagar Um
-        window.apagarUm = async (id) => {
-            if (confirm("Apagar este palpite?")) {
-                await deleteDoc(doc(db, "palpites", id));
-            }
-        };
-
-        // 5. Limpar Tudo
-        window.limparPalpites = async () => {
-            const senha = prompt("Digite a senha de administrador:");
-            if (senha === "185422") {
-                const querySnapshot = await getDocs(col);
-                querySnapshot.forEach(async (docSnap) => {
-                    await deleteDoc(docSnap.ref);
-                });
-                alert("Lista limpa!");
-            } else {
-                alert("Senha incorreta!");
-            }
-        };
-    </script>
-
-    <br><br>
-    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; max-width: 300px; margin: auto;">
-        <button onclick="ativarModoAdmin()">Ativar Exclusão (Admin)</button>
-        <button onclick="limparPalpites()" style="background: red;">Limpar Tudo</button>
-    </div>
-</body>
-</html>
+                        <span><strong>${d.nome}</strong>: ${d.brasil}
