@@ -46,7 +46,7 @@
             const b = document.getElementById('golsBrasil').value;
             const j = document.getElementById('golsNoruega').value;
             if(n && b !== "" && j !== "") {
-                await addDoc(col, { nome: n, brasil: b, japao: j, data: Date.now() });
+                await addDoc(col, { nome: n, brasil: b, noruega: n, data: Date.now() });
                 document.getElementById('nome').value = "";
                 document.getElementById('golsBrasil').value = "";
                 document.getElementById('golsNoruega').value = "";
