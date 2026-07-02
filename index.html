@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Palpites Brasil x Japão</title>
+    <title>Palpites Brasil x Noruega</title>
     <style>
         body { font-family: sans-serif; background: #009639; color: white; padding: 20px; text-align: center; }
         .card { background: #ffdf00; color: #002776; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; }
@@ -17,7 +17,7 @@
     <div class="card">
         <input id="nome" placeholder="Seu nome">
         <input id="golsBrasil" type="number" placeholder="Gols Brasil">
-        <input id="golsJapao" type="number" placeholder="Gols Japão">
+        <input id="golsNoruega" type="number" placeholder="Gols Noruega">
         <br>
         <button onclick="enviar()">Enviar Palpite</button>
     </div>
@@ -44,12 +44,12 @@
         window.enviar = async () => {
             const n = document.getElementById('nome').value;
             const b = document.getElementById('golsBrasil').value;
-            const j = document.getElementById('golsJapao').value;
+            const j = document.getElementById('golsNoruega').value;
             if(n && b !== "" && j !== "") {
                 await addDoc(col, { nome: n, brasil: b, japao: j, data: Date.now() });
                 document.getElementById('nome').value = "";
                 document.getElementById('golsBrasil').value = "";
-                document.getElementById('golsJapao').value = "";
+                document.getElementById('golsNoruega').value = "";
             } else {
                 alert("Preencha todos os campos!");
             }
@@ -64,7 +64,7 @@
                 // O botão de exclusão começa com display:none (invisível)
                 lista.innerHTML += `
                     <div class="item">
-                        <span>${d.nome}: ${d.brasil} x ${d.japao}</span>
+                        <span>${d.nome}: ${d.brasil} x ${d.noruega}</span>
                         <button class="admin-btn" onclick="apagarUm('${docSnap.id}')" style="display:none; background:none; border:none; color:red; cursor:pointer; font-weight:bold;">x</button>
                     </div>`;
             });
