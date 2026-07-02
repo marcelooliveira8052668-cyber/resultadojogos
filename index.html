@@ -129,4 +129,34 @@
                 const d = docSnap.data();
                 lista.innerHTML += `
                     <div class="item">
-                        <span><strong>${d.nome}</strong>: ${d.brasil}
+                        <span><strong>${d.nome}</strong>: ${d.brasil} x ${d.noruega}</span>
+                        <button class="admin-btn" onclick="apagarUm('${docSnap.id}')" style="display:none; color:red; border:none; background:none;">X</button>
+                    </div>`;
+            });
+        });
+
+        window.ativarModoAdmin = () => {
+            const senha = prompt("Senha de administrador:");
+            if (senha === "185422") {
+                document.querySelectorAll('.admin-btn').forEach(btn => btn.style.display = "inline");
+            } else {
+                alert("Senha incorreta!");
+            }
+        };
+
+        window.apagarUm = async (id) => {
+            if (confirm("Apagar este palpite?")) await deleteDoc(doc(db, "palpites", id));
+        };
+
+        window.limparPalpites = async () => {
+            const senha = prompt("Senha de administrador:");
+            if (senha === "185422") {
+                const snap = await getDocs(col);
+                snap.forEach(d => deleteDoc(d.ref));
+            } else {
+                alert("Senha incorreta!");
+            }
+        };
+    </script>
+</body>
+</html>
